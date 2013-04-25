@@ -56,6 +56,9 @@ class Survey(models.Model):
 
     objects = SurveyManager()
 
+    def __unicode__(self):
+        return u' - '.join([self.slug, self.title])
+
     @property
     def _cache_name(self):
         if not self.id:
@@ -120,17 +123,10 @@ class Survey(models.Model):
             question__survey=self.id).values('session_key').distinct())
         return self._submission_count
 
-
     def has_answers_from(self, session_key):
         return bool(
             Answer.objects.filter(session_key__exact=session_key.lower(),
             question__survey__id__exact=self.id).distinct().count())
-
-
-
-    def __unicode__(self):
-        return u' - '.join([self.slug, self.title])
-
 
     @models.permalink
     def get_absolute_url(self):

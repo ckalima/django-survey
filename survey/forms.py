@@ -261,7 +261,7 @@ class SurveyForm(ModelForm):
                                label=Survey._meta.get_field("closes").verbose_name)
     class Meta:
         model = Survey
-        exclude = ("created_by","editable_by","slug","recipient_type","recipient_id")
+        exclude = ("created_by","editable_by","slug")
     def clean(self):
         title_slug = slugify(self.cleaned_data.get("title"))
         if not hasattr(self,"instance"):

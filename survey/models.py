@@ -24,10 +24,7 @@ QTYPE_CHOICES = (
 )
 
 class SurveyManager(models.Manager):
-
-    def surveys_for(self, recipient):
-        recipient_type = ContentType.objects.get_for_model(recipient)
-        return Survey.objects.filter(visible=True,recipient_type=recipient_type, recipient_id=recipient.id)
+    pass
 
 
 class Survey(models.Model):
@@ -56,11 +53,6 @@ class Survey(models.Model):
     # TODO: Plug this control in the view used to edit the survey
     created_by = models.ForeignKey(User, related_name="created_surveys")
     editable_by = models.ForeignKey(User,related_name="owned_surveys")
-
-    # Integration in Pinax
-    recipient_type = models.ForeignKey(ContentType,null=True)
-    recipient_id = models.PositiveIntegerField(null=True)
-    recipient = generic.GenericForeignKey('recipient_type', 'recipient_id')
 
     objects = SurveyManager()
 

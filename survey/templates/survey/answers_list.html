@@ -17,7 +17,7 @@
 }
 </style>
 {% endblock %}
-{% block content %}
+{% block survey_content %}
 <h1>{{ title }} <i>({{ survey.interview_count }} {% trans "Interview" %}{{ survey.interview_count|pluralize:"s" }})</i></h1>
 <br/>
 {% for question in survey.questions.all %}

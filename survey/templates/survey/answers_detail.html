@@ -1,9 +1,27 @@
 {% extends "survey/base.html" %}
+{% load i18n %}
+{% block title %}{{ survey.title }} | Marinexplore{% endblock %}
+{% if survey.description %}
+    {% block metadescription %}
+        <meta name="description" content="{{ survey.title }} submission. {{ survey.description|striptags }}">
+    {% endblock %}
+{% endif %}
+{% block css_includes %}
+<style type="text/css">
+.subheading { font-size: 0.8em; color: #666; text-transform: uppercase; margin:0;}
+.question { padding: 2em 0 0 0;margin: 2em 0 0 0;border-top:1px solid #999;}
+</style>
+{% endblock %}
 {% block survey_content %}
-<h1>{{ title }}</h1>
+<h5 class="subheading">
+    {% if user %}<a href="{{ user.get_absolute_url }}">{{ user }}</a>{% else %}Anonymous{% endif %}
+    on {{ submission_date|date:"F jS, Y H:i T" }}
+</h5>
+<h1>{{ survey.title }}</h1>
 {% for answer in submission %}
-<h2>{{ answer.question.text }}</h2>
-<div>{{ answer.text }}</div>
-<br/>
+    <div class="answer">
+        <strong>{{ answer.question.text }}</strong>
+        <div>{{ answer.text }}</div>
+    </div>
 {% endfor %}
 {% endblock %}

@@ -5,8 +5,8 @@
 {% block survey_content %}
 <table class="table">
     <thead>
-        <th>{% trans "Survey"%}</th>
-        <th>{% trans "Responses"%}</th>
+        <th>{% trans "Surveys" %}</th>
+        {% if user|can_view_answers:survey %}<th>{% trans "Responses"%}</th>{% endif %}
     </thead>
     <tbody>
     {% for survey in object_list %}
@@ -20,8 +20,8 @@
             {% endif %}
             <em class="survey-status-{{ survey.status }}">({{ survey.status }})</em>
         </td>
-        <td>
         {% if user|can_view_answers:survey %}
+        <td>
             {% if survey.interview_count %}
                 <a href='{% url survey-results survey_slug=survey.slug %}'>{{ survey.interview_count }}</a>
             {% else %}
@@ -30,8 +30,8 @@
         {% endif %}
         {% if request|has_answered:survey %}
             &sdot; <a href='{% url answers-detail survey_slug=survey.slug,key=request.session.session_key %}'>Your Response</a>
-        {% endif %}
         </td>
+        {% endif %}
     </tr>
     {% endif %}
     {% endfor %}

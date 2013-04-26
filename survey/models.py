@@ -142,9 +142,8 @@ class Survey(models.Model):
         return res
 
     def answers_viewable_by(self, user):
-        if not self.visible: return False
-        if self.public: return True
-        if user.is_anonymous(): return False
+        if not self.visible or user.is_anonymous(): return False
+        if self.public or user.is_staff: return True
         return user.has_perm('survey.view_answers')
 
 

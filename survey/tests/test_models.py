@@ -40,12 +40,12 @@ True
 
 Test the creation of a question
 
->>> question1 = Question(survey=survey, text="Is it working ?")
+>>> question1 = SurveyQuestion(survey=survey, text="Is it working ?")
 >>> question1.save()
->>> question2 = Question(survey=survey, text="How are you doing ?")
+>>> question2 = SurveyQuestion(survey=survey, text="How are you doing ?")
 >>> question2.save()
 >>> survey.questions.all()
-[<Question: survey-1 - Is it working ?>, <Question: survey-1 - How are you doing ?>]
+[<SurveyQuestion: survey-1 - Is it working ?>, <SurveyQuestion: survey-1 - How are you doing ?>]
 
 Test the question API
 
@@ -57,14 +57,14 @@ Test the question API
 
 Test the creation of a choice
 
->>> choice1 = Choice(question=question1,text="Yes")
+>>> choice1 = SurveyChoice(question=question1,text="Yes")
 >>> choice1.save()
->>> choice2 = Choice(question=question1,text="No")
+>>> choice2 = SurveyChoice(question=question1,text="No")
 >>> choice2.save()
 
 >>> question1.choice_count
 2
 >>> question1.choices.all()
-[<Choice: Yes>, <Choice: No>]
+[<SurveyChoice: Yes>, <SurveyChoice: No>]
 
 """

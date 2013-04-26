@@ -110,7 +110,7 @@ class Survey(models.Model):
         # NOTSURE: Do we realy need this optimisation?
         if hasattr(self, '_interview_count'):
             return self._interview_count
-        self._interview_count = len(Answer.objects.filter(
+        self._interview_count = len(SurveyAnswer.objects.filter(
             question__survey=self.id).values('interview_uuid').distinct())
         return self._interview_count
 
@@ -119,7 +119,7 @@ class Survey(models.Model):
         # NOTSURE: Do we realy need this optimisation?
         if hasattr(self, '_session_key_count'):
             return self._submission_count
-        self._submission_count = len(Answer.objects.filter(
+        self._submission_count = len(SurveyAnswer.objects.filter(
             question__survey=self.id).values('session_key').distinct())
         return self._submission_count
 
@@ -129,7 +129,7 @@ class Survey(models.Model):
         else:
             key = None
         return bool(
-            Answer.objects.filter(session_key__exact=key,
+            SurveyAnswer.objects.filter(session_key__exact=key,
             question__survey__id__exact=self.id).distinct().count())
 
     @models.permalink
@@ -148,7 +148,7 @@ class Survey(models.Model):
         return user.has_perm('survey.view_answers')
 
 
-class Question(models.Model):
+class SurveyQuestion(models.Model):
     survey = models.ForeignKey(Survey, related_name='questions',
                                  verbose_name=_('survey'))
     qtype = models.CharField(_('question type'), max_length=2,
@@ -189,6 +189,7 @@ class Question(models.Model):
         unique_together = (('survey', 'text'),)
         order_with_respect_to='survey'
         ordering = ('survey', 'order')
+        db_table = "survey_question"
 
     class Admin:
         list_select_related = True
@@ -206,9 +207,9 @@ class Question(models.Model):
     def choice_count(self):
         return self.choices.count()
 
-class Choice(models.Model):
+class SurveyChoice(models.Model):
     ## validate question is of proper qtype
-    question = models.ForeignKey(Question, related_name='choices',
+    question = models.ForeignKey(SurveyQuestion, related_name='choices',
                                  verbose_name=_('question'))
     text = models.CharField(_('choice text'), max_length=500)
     # TODO: Add a button or check box to remove the file. There are several
@@ -228,7 +229,7 @@ class Choice(models.Model):
     def count(self):
         if hasattr(self, '_count'):
             return self._count
-        self._count = Answer.objects.filter(question=self.question_id,
+        self._count = SurveyAnswer.objects.filter(question=self.question_id,
                                             text=self.text).count()
         return self._count
 
@@ -239,12 +240,13 @@ class Choice(models.Model):
         unique_together = (('question', 'text'),)
         order_with_respect_to='question'
         ordering = ('question', 'order')
+        db_table = "survey_choice"
 
-class Answer(models.Model):
+class SurveyAnswer(models.Model):
     user = models.ForeignKey(User, related_name='answers',
                              verbose_name=_('user'), editable=False,
                              blank=True,null=True)
-    question = models.ForeignKey(Question, related_name='answers',
+    question = models.ForeignKey(SurveyQuestion, related_name='answers',
                                  verbose_name=_('question'),
                                  editable=False)
     ## sessions expire, survey results do not, so keep the key.
@@ -259,3 +261,4 @@ class Answer(models.Model):
         # unique_together = (('question', 'session_key'),)
         permissions = (("view_answers",     "Can view survey answers"),
                        ("view_submissions", "Can view survey submissions"))
+        db_table = "survey_answer"

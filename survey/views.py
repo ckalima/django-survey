@@ -8,6 +8,7 @@ from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
+from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.http import HttpResponseNotFound
 from django.template import loader, RequestContext
@@ -17,8 +18,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic.list_detail import object_list
 from django.views.generic.create_update import delete_object
 
-from survey.forms import forms_for_survey, SurveyForm, QuestionForm, ChoiceForm
-from survey.models import Survey, Answer, Question, Choice
+from survey.forms import forms_for_survey, SurveyForm, SurveyQuestionForm, SurveyChoiceForm
+from survey.models import Survey, SurveyAnswer, SurveyQuestion, SurveyChoice
 from survey.settings import LOGIN_URL
 
 
@@ -46,12 +47,12 @@ def _survey_redirect(request, survey,
         request.REQUEST['next'].startswith('http:') and
         request.REQUEST['next'] != request.path):
         return HttpResponseRedirect(request.REQUEST['next'])
-    if survey.answers_viewable_by(request.user):
-        return HttpResponseRedirect(reverse('survey-results', None, (),
-                                                {'survey_slug': survey.slug}))
+    # if survey.answers_viewable_by(request.user):
+    #     return HttpResponseRedirect(reverse('survey-results', None, (),
+    #                                             {'survey_slug': survey.slug}))
 
     # For this survey, have they answered any questions?
-    if (hasattr(request, 'session') and Answer.objects.filter(
+    if (hasattr(request, 'session') and SurveyAnswer.objects.filter(
             session_key=request.session.session_key.lower(),
             question__survey__visible=True,
             question__survey__slug=survey.slug).count()):
@@ -216,7 +217,7 @@ def question_add(request,survey_slug,
     survey = get_object_or_404(Survey, slug=survey_slug)
     if request.method == "POST":
         request_post = request.POST.copy()
-        question_form = QuestionForm(data=request_post,files=request.FILES)
+        question_form = SurveyQuestionForm(data=request_post,files=request.FILES)
         if question_form.is_valid():
             new_question = question_form.save(commit=False)
             new_question.survey = survey
@@ -225,7 +226,7 @@ def question_add(request,survey_slug,
                                                 {"survey_slug":survey_slug}))
 
     else:
-        question_form = QuestionForm()
+        question_form = SurveyQuestionForm()
     return render_to_response(template_name,
                               {'title': _("Add a question"),
                                'form' : question_form},
@@ -239,13 +240,13 @@ def question_update(request,survey_slug,question_id,
                     extra_context=None,
                     *args, **kw):
     survey = get_object_or_404(Survey, slug=survey_slug)
-    question =  get_object_or_404(Question,id=question_id)
+    question =  get_object_or_404(SurveyQuestion,id=question_id)
     if question not in survey.questions.iterator():
         raise Http404()
 
     if request.method == "POST":
         request_post = request.POST.copy()
-        question_form = QuestionForm(instance=question,data=request_post,
+        question_form = SurveyQuestionForm(instance=question,data=request_post,
                                      files=request.FILES)
 
         if question_form.is_valid():
@@ -255,12 +256,12 @@ def question_update(request,survey_slug,question_id,
             return HttpResponseRedirect(reverse("survey-edit",None,(),
                                                 {"survey_slug":survey_slug}))
     else:
-        question_form = QuestionForm(instance=question)
+        question_form = SurveyQuestionForm(instance=question)
 
     return render_to_response(template_name,
                               {'title': _("Update question"),
                                'question' : question,
-                               'model_string' : "Question",
+                               'model_string' : "SurveyQuestion",
                                'form' : question_form},
                               context_instance=RequestContext(request))
 
@@ -276,7 +277,7 @@ def question_delete(request,survey_slug,question_id,
     # http://groups.google.com/group/django-users/browse_thread/thread/e6c96ab0538a544e/0e01cdda3668dfce#0e01cdda3668dfce
     request_post = request.POST.copy()
     return delete_object(request, object_id=question_id,
-        **{"model":Question,
+        **{"model":SurveyQuestion,
          "post_delete_redirect": reverse("survey-edit",None,(),
                                          {"survey_slug":survey_slug,
                                           "group_slug":group_slug}),
@@ -292,11 +293,11 @@ def choice_add(request,question_id,
                 template_name = 'survey/choice_add.html',
                 extra_context=None,
                 *args, **kw):
-    question = get_object_or_404(Question, id=question_id)
+    question = get_object_or_404(SurveyQuestion, id=question_id)
 
     if request.method == "POST":
         request_post = request.POST.copy()
-        choice_form = ChoiceForm(data=request_post,files=request.FILES)
+        choice_form = SurveyChoiceForm(data=request_post,files=request.FILES)
         if choice_form.is_valid():
             new_choice = choice_form.save(commit=False)
             new_choice.question = question
@@ -304,7 +305,7 @@ def choice_add(request,question_id,
             return HttpResponseRedirect(reverse("survey-edit",None,(),
                                                 {"survey_slug":question.survey.slug}))
     else:
-        choice_form = ChoiceForm()
+        choice_form = SurveyChoiceForm()
 
     return render_to_response(template_name,
                               {'title': _("Add a choice"),
@@ -318,13 +319,13 @@ def choice_update(request,question_id, choice_id,
                 template_name = 'survey/choice_add.html',
                 extra_context=None,
                 *args, **kw):
-    question = get_object_or_404(Question, id=question_id)
-    choice = get_object_or_404(Choice, id=choice_id)
+    question = get_object_or_404(SurveyQuestion, id=question_id)
+    choice = get_object_or_404(SurveyChoice, id=choice_id)
     if choice not in question.choices.iterator():
         raise Http404()
     if request.method == "POST":
         request_post = request.POST.copy()
-        choice_form = ChoiceForm(instance=choice,data=request_post,
+        choice_form = SurveyChoiceForm(instance=choice,data=request_post,
                                  files=request.FILES)
         if choice_form.is_valid():
             new_choice = choice_form.save(commit=False)
@@ -333,7 +334,7 @@ def choice_update(request,question_id, choice_id,
             return HttpResponseRedirect(reverse("survey-edit",None,(),
                                                 {"survey_slug":question.survey.slug}))
     else:
-        choice_form = ChoiceForm(instance=choice)
+        choice_form = SurveyChoiceForm(instance=choice)
     return render_to_response(template_name,
                               {'title': _("Update choice"),
                                'choice' : choice,
@@ -353,7 +354,7 @@ def choice_delete(request,survey_slug,choice_id,
     # http://groups.google.com/group/django-users/browse_thread/thread/e6c96ab0538a544e/0e01cdda3668dfce#0e01cdda3668dfce
     request_post = request.POST.copy()
     return delete_object(request, object_id=choice_id,
-        **{"model":Choice,
+        **{"model":SurveyChoice,
          "post_delete_redirect": reverse("survey-edit",None,(),
                                          {"survey_slug":survey_slug}),
          "template_object_name":"choice",
@@ -420,9 +421,8 @@ def answers_list(request, survey_slug,
     return render_to_response(template_name,
         { 'survey': survey,
           'view_submissions': request.user.has_perm('survey.view_submissions'),
-          'title': survey.title + u' - ' + unicode(_('Results'))},
+          'title': survey.title },
         context_instance=RequestContext(request))
-
 
 
 def answers_detail(request, survey_slug, key,
@@ -435,21 +435,28 @@ def answers_detail(request, survey_slug, key,
 
     If the user lacks permissions, show an "Insufficient Permissions page".
     """
-    answers = Answer.objects.filter(session_key=key.lower(),
+    answers = SurveyAnswer.objects.filter(session_key=key.lower(),
         question__survey__visible=True, question__survey__slug=survey_slug)
     if not answers.count(): raise Http404
     survey = answers[0].question.survey
+    try:
+      user = answers[0].user
+    except:
+      user = None
+
+    submission_date = answers[0].submission_date
 
     mysubmission = (hasattr(request, 'session') and
          request.session.session_key.lower() == key.lower())
 
+    # requires staff access to view
     if (not mysubmission and
         (not request.user.has_perm('survey.view_submissions') or
-         not survey.answers_viewable_by(request.user))):
+         not survey.answers_viewable_by(request.user) or
+         not request.user.is_staff)):
         return HttpResponse(unicode(_('Insufficient Privileges.')), status=403)
     return render_to_response(template_name,
-        {'survey': survey, 'submission': answers,
-         'title': survey.title + u' - ' + unicode(_('Submission'))},
+        {'survey': survey, 'submission': answers, 'user': user, 'submission_date': submission_date, },
         context_instance=RequestContext(request))
 
 def delete_image(request, model_string,object_id):

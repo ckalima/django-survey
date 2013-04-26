@@ -1,4 +1,4 @@
-from models import QTYPE_CHOICES, Answer, Survey, Question, Choice
+from models import QTYPE_CHOICES, SurveyAnswer, Survey, SurveyQuestion, SurveyChoice
 from django.conf import settings
 from django.forms import BaseForm, Form, ValidationError
 from django.forms import CharField, ChoiceField, SplitDateTimeField,\
@@ -70,7 +70,7 @@ class BaseAnswerForm(Form):
             return
         ans = self.answer
         if ans is None:
-            ans = Answer()
+            ans = SurveyAnswer()
         ans.question = self.question
         ans.session_key = self.session_key
         if self.user.is_authenticated():
@@ -108,11 +108,11 @@ class NullSelect(Select):
         self.choices = base_choices
         return result
 
-class ChoiceAnswer(BaseAnswerForm):
+class SurveyChoiceAnswer(BaseAnswerForm):
     answer = ChoiceField(widget=NullSelect)
 
     def __init__(self, *args, **kwdargs):
-        super(ChoiceAnswer, self).__init__(*args, **kwdargs)
+        super(SurveyChoiceAnswer, self).__init__(*args, **kwdargs)
         choices = []
         choices_dict = {}
         self.initial_answer = None
@@ -137,9 +137,9 @@ class ChoiceAnswer(BaseAnswerForm):
             raise ValidationError, _('This field is required.')
         return self.choices_dict.get(key, key)
 
-class ChoiceRadio(ChoiceAnswer):
+class SurveyChoiceRadio(SurveyChoiceAnswer):
     def __init__(self, *args, **kwdargs):
-        super(ChoiceRadio, self).__init__(*args, **kwdargs)
+        super(SurveyChoiceRadio, self).__init__(*args, **kwdargs)
         self.fields['answer'].widget = BootstrapRadioSelect(choices=self.choices)
 
 class BootstrapRadioInput(RadioInput):
@@ -173,9 +173,9 @@ class BootstrapRadioSelect(RadioSelect):
     """
     renderer = BootstrapRadioRenderer
 
-class ChoiceImage(ChoiceAnswer):
+class SurveyChoiceImage(SurveyChoiceAnswer):
     def __init__(self, *args, **kwdargs):
-        super(ChoiceImage, self).__init__(*args, **kwdargs)
+        super(SurveyChoiceImage, self).__init__(*args, **kwdargs)
         #import pdb; pdb.set_trace()
         self.choices = [ (k,mark_safe(v)) for k,v in self.choices ]
         self.fields['answer'].widget = RadioSelect(choices=self.choices)
@@ -207,11 +207,11 @@ class BootstrapCheckboxSelectMultiple(CheckboxSelectMultiple):
             output.append(u'<label class="checkbox"%s>%s %s</label>' % (label_for, rendered_cb, option_label))
         return mark_safe(u'\n'.join(output))
 
-class ChoiceCheckbox(BaseAnswerForm):
+class SurveyChoiceCheckbox(BaseAnswerForm):
     answer = MultipleChoiceField(widget=BootstrapCheckboxSelectMultiple)
 
     def __init__(self, *args, **kwdargs):
-        super(ChoiceCheckbox, self).__init__(*args, **kwdargs)
+        super(SurveyChoiceCheckbox, self).__init__(*args, **kwdargs)
         choices = []
         choices_dict = {}
         self.initial_answer = None
@@ -237,7 +237,7 @@ class ChoiceCheckbox(BaseAnswerForm):
             raise ValidationError, _('This field is required.')
         for key in keys:
             if not key and self.fields['answer'].required:
-                raise ValidationError, _('Invalid Choice.')
+                raise ValidationError, _('Invalid SurveyChoice.')
         return [self.choices_dict.get(key, key) for key in keys]
     def save(self, commit=True):
         if not self.cleaned_data['answer']:
@@ -246,7 +246,7 @@ class ChoiceCheckbox(BaseAnswerForm):
             return
         ans_list = []
         for text in self.cleaned_data['answer']:
-            ans = Answer()
+            ans = SurveyAnswer()
             ans.question = self.question
             ans.session_key = self.session_key
             ans.text = text
@@ -259,10 +259,10 @@ class ChoiceCheckbox(BaseAnswerForm):
 QTYPE_FORM = {
     'T': TextInputAnswer,
     'A': TextAreaAnswer,
-    'S': ChoiceAnswer,
-    'R': ChoiceRadio,
-    'I': ChoiceImage,
-    'C': ChoiceCheckbox,
+    'S': SurveyChoiceAnswer,
+    'R': SurveyChoiceRadio,
+    'I': SurveyChoiceImage,
+    'C': SurveyChoiceCheckbox,
 }
 
 def forms_for_survey(survey, request, edit_existing=False):
@@ -334,12 +334,12 @@ class SurveyForm(ModelForm):
 
         return self.cleaned_data
 
-class QuestionForm(ModelForm):
+class SurveyQuestionForm(ModelForm):
     class Meta:
-        model= Question
+        model= SurveyQuestion
         exclude = ("survey")
 
-class ChoiceForm(ModelForm):
+class SurveyChoiceForm(ModelForm):
     class Meta:
-        model = Choice
+        model = SurveyChoice
         exclude = ("question")

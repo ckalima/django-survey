@@ -449,15 +449,16 @@ def answers_detail(request, survey_slug, key,
     mysubmission = (hasattr(request, 'session') and
          request.session.session_key.lower() == key.lower())
 
-    # requires staff access to view
-    if (not mysubmission and
-        (not request.user.has_perm('survey.view_submissions') or
-         not survey.answers_viewable_by(request.user) or
-         not request.user.is_staff)):
-        return HttpResponse(unicode(_('Insufficient Privileges.')), status=403)
-    return render_to_response(template_name,
-        {'survey': survey, 'submission': answers, 'user': user, 'submission_date': submission_date, },
-        context_instance=RequestContext(request))
+    # if owner, has_perm, viewable_by, or is_staff... display answer details
+    if (mysubmission or
+        (request.user.has_perm('survey.view_submissions') or
+         survey.answers_viewable_by(request.user) or
+         request.user.is_staff)):
+      return render_to_response(template_name,
+          {'survey': survey, 'submission': answers, 'user': user, 'submission_date': submission_date, },
+          context_instance=RequestContext(request))
+    else:
+      return render_to_response('survey/no_privileges.html', {}, context_instance=RequestContext(request))
 
 def delete_image(request, model_string,object_id):
     model = models.get_model("survey", model_string)

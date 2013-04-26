@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import patterns, url
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.list_detail import object_list
+from django.views.generic.simple import direct_to_template
 from django.conf.urls.defaults import *
 
 
@@ -39,5 +40,7 @@ urlpatterns = patterns('',
     # url(r'^choice/delete/(?P<survey_slug>[-\w]+)/(?P<choice_id>\d+)/$', choice_delete,   name='choice-delete'),
 
     # url(r'^delete_image/(?P<model_string>[-\w]+)/(?P<object_id>\d+)/$', delete_image, name='delete-image'),
+    url(r'^thank-you', direct_to_template, {'template': 'survey/thankyou.html'}),
+    url(r'^no-privileges', direct_to_template, {'template': 'survey/no_privileges.html'}),
     url(r'^$', visible_survey_list, name='surveys'),
     )

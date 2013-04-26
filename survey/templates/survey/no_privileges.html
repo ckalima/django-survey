@@ -1,0 +1,8 @@
+{% extends "survey/base.html" %}
+{% load i18n %}
+{% block title %}Insufficient Privileges | Marinexplore{% endblock %}
+{% block survey_content %}
+    <div class="survey-insufficient-privileges">
+        <h3 class="message">{% trans "You have insufficient privileges to view this survey." %}</h3>
+    </div>
+{% endblock %}

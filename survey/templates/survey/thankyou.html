@@ -1,5 +1,8 @@
 {% extends "survey/base.html" %}
 {% load i18n %}
+{% block title %}Survey Completed | Marinexplore{% endblock %}
 {% block survey_content %}
-<h2>{% trans "Thank you for you submission!" %}</h2>
+    <div class="survey-thank-you">
+        <h3 class="message">{% trans "Thank you for your response." %}</h3>
+    </div>
 {% endblock %}

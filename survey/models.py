@@ -151,6 +151,7 @@ class Question(models.Model):
                                 choices=QTYPE_CHOICES)
     required = models.BooleanField(_('required'), default=True)
     text     = models.TextField(_('question text'))
+    help_text = models.TextField(null=True, blank=True)
     order = models.IntegerField(verbose_name = _("order"),
                                 null=True, blank=True)
     # TODO: Add a button or check box to remove the file. There are several

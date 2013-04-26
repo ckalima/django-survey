@@ -19,6 +19,7 @@ from django.views.generic.create_update import delete_object
 
 from survey.forms import forms_for_survey, SurveyForm, QuestionForm, ChoiceForm
 from survey.models import Survey, Answer, Question, Choice
+from survey.settings import LOGIN_URL
 
 
 def _survey_redirect(request, survey,
@@ -89,7 +90,7 @@ def survey_detail(request, survey_slug,
     # if the survey is restricted to authentified user redirect
     # annonymous user to the login page
     if survey.restricted and str(request.user) == "AnonymousUser":
-        return HttpResponseRedirect(reverse("auth_login")+"?next=%s" % request.path)
+        return HttpResponseRedirect(LOGIN_URL+"?next=%s" % request.path)
     if request.POST and not hasattr(request, 'session'):
         return HttpResponse(unicode(_('Cookies must be enabled.')), status=403)
     if hasattr(request, 'session'):

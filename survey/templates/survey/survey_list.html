@@ -3,7 +3,7 @@
 {% load survey %}
 {% block title %}Surveys | Marinexplore{% endblock %}
 {% block survey_content %}
-<table class="table">
+<table class="table survey-listing">
     <thead>
         <th>{% trans "Surveys" %}</th>
         {% if user|can_view_answers:survey %}<th>{% trans "Responses"%}</th>{% endif %}
@@ -18,7 +18,7 @@
             {% else %}
                 {{ survey.title }}
             {% endif %}
-            <em class="survey-status-{{ survey.status }}">({{ survey.status }})</em>
+            <span class="survey-status survey-status-{{ survey.status }}">{{ survey.status }}</span>
         </td>
         {% if user|can_view_answers:survey %}
         <td>

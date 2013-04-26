@@ -124,8 +124,12 @@ class Survey(models.Model):
         return self._submission_count
 
     def has_answers_from(self, session_key):
+        if session_key:
+            key = session_key.lower()
+        else:
+            key = None
         return bool(
-            Answer.objects.filter(session_key__exact=session_key.lower(),
+            Answer.objects.filter(session_key__exact=key,
             question__survey__id__exact=self.id).distinct().count())
 
     @models.permalink

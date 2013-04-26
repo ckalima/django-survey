@@ -1,9 +1,17 @@
+{% load survey %}
 {% for bound_field in bound_fields %}
-    {% if forloop.first %}
-        <div {{ bound_field.form.question.qstyle|default_if_none:""|safe }}>
-    {% endif %}
-    {% include "forms/field.html" %}
-    {% if forloop.first %}
-        </div>
-    {% endif %}
+    <div class="survey-question{% if forloop.first %} first{% endif %}">
+        {% if bound_field.errors %}
+        <div class="control-group error">
+            {{ bound_field.errors }}
+        {% endif %}
+        <label>{% if bound_field.field.required %}<span class="required">*</span>{% endif %}<strong>{{ bound_field.label }}</strong></label>
+        {% if bound_field.form.question.get_image_url %}<img src="{{ bound_field.form.question.get_image_url }}"/>{% endif %}
+        {% if bound_field.form.choice.get_image_url %}<img src="{{ bound_field.form.choice.get_image_url }}"/>{% endif %}
+        {{ bound_field }}
+        {% if bound_field.form.question.help_text %}<span class="help-block">{{ bound_field.form.question.help_text }}</span>{% endif %}
+        {% if bound_field.errors %}
+        </div><!-- .control-group error -->
+        {% endif %}
+    </div><!-- .survey-question -->
 {% endfor %}

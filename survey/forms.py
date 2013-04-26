@@ -2,15 +2,18 @@ from models import QTYPE_CHOICES, Answer, Survey, Question, Choice
 from django.conf import settings
 from django.forms import BaseForm, Form, ValidationError
 from django.forms import CharField, ChoiceField, SplitDateTimeField,\
-                            CheckboxInput, BooleanField,FileInput,\
+                            CheckboxInput, BooleanField, FileInput,\
                             FileField, ImageField
 from django.forms import Textarea, TextInput, Select, RadioSelect,\
                             CheckboxSelectMultiple, MultipleChoiceField,\
                             SplitDateTimeWidget,MultiWidget, MultiValueField
 from django.forms.forms import BoundField
+from django.forms.widgets import RadioInput, RadioFieldRenderer, RadioSelect
 from django.forms.models import ModelForm
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
+from django.utils.encoding import force_unicode
+from django.utils.html import escape, conditional_escape
 from django.template import Context, loader
 from django.template.defaultfilters import slugify
 
@@ -42,8 +45,8 @@ class BaseAnswerForm(Form):
         answer = self.fields['answer']
         answer.required = question.required
         answer.label = question.text
-        if not question.required:
-            answer.help_text = unicode(_('this question is optional'))
+        # if not question.required:
+        #     answer.help_text = unicode(_('this question is optional'))
         if initial is not None and initial != answer.initial:
             if kwdargs['initial']['answer'] != answer.initial:
                 ## rats.. we are a choice list style and need to map to id.
@@ -137,7 +140,38 @@ class ChoiceAnswer(BaseAnswerForm):
 class ChoiceRadio(ChoiceAnswer):
     def __init__(self, *args, **kwdargs):
         super(ChoiceRadio, self).__init__(*args, **kwdargs)
-        self.fields['answer'].widget = RadioSelect(choices=self.choices)
+        self.fields['answer'].widget = BootstrapRadioSelect(choices=self.choices)
+
+class BootstrapRadioInput(RadioInput):
+    """
+    Twitter Bootstrap formatted radio input label.
+    """
+    def __unicode__(self):
+        if 'id' in self.attrs:
+            label_for = ' for="%s_%s"' % (self.attrs['id'], self.index)
+        else:
+            label_for = ''
+        return mark_safe(u'<label class="radio"%s>%s %s</label>' % (label_for, self.tag(), self.choice_label))
+
+class BootstrapRadioRenderer(RadioFieldRenderer):
+    """
+    Overrides default <ul> wrappers for RadioSelect widget,
+    and renders with Twitter Bootstrap friendly markup.
+    """
+    def __iter__(self):
+        for i, choice in enumerate(self.choices):
+            yield BootstrapRadioInput(self.name, self.value, self.attrs.copy(), choice, i)
+    def __getitem__(self, idx):
+        choice = self.choices[idx] # Let the IndexError propogate
+        return BootstrapRadioInput(self.name, self.value, self.attrs.copy(), choice, idx)
+    def render(self):
+        return mark_safe(u'\n'.join([u'%s\n' % w for w in self]))
+
+class BootstrapRadioSelect(RadioSelect):
+    """
+    Custom Twitter Bootstrap RadioSelect with proper layout rendering.
+    """
+    renderer = BootstrapRadioRenderer
 
 class ChoiceImage(ChoiceAnswer):
     def __init__(self, *args, **kwdargs):
@@ -146,8 +180,35 @@ class ChoiceImage(ChoiceAnswer):
         self.choices = [ (k,mark_safe(v)) for k,v in self.choices ]
         self.fields['answer'].widget = RadioSelect(choices=self.choices)
 
+class BootstrapCheckboxSelectMultiple(CheckboxSelectMultiple):
+    """
+    Custom Twitter Bootstrap RadioSelect with proper layout rendering.
+    """
+    def render(self, name, value, attrs=None, choices=()):
+        if value is None: value = []
+        has_id = attrs and 'id' in attrs
+        final_attrs = self.build_attrs(attrs, name=name)
+        output = []
+        # Normalize to strings
+        str_values = set([force_unicode(v) for v in value])
+        for i, (option_value, option_label) in enumerate(chain(self.choices, choices)):
+            # If an ID attribute was given, add a numeric index as a suffix,
+            # so that the checkboxes don't all have the same ID attribute.
+            if has_id:
+                final_attrs = dict(final_attrs, id='%s_%s' % (attrs['id'], i))
+                label_for = u' for="%s"' % final_attrs['id']
+            else:
+                label_for = ''
+
+            cb = CheckboxInput(final_attrs, check_test=lambda value: value in str_values)
+            option_value = force_unicode(option_value)
+            rendered_cb = cb.render(name, option_value)
+            option_label = conditional_escape(force_unicode(option_label))
+            output.append(u'<label class="checkbox"%s>%s %s</label>' % (label_for, rendered_cb, option_label))
+        return mark_safe(u'\n'.join(output))
+
 class ChoiceCheckbox(BaseAnswerForm):
-    answer = MultipleChoiceField(widget=CheckboxSelectMultiple)
+    answer = MultipleChoiceField(widget=BootstrapCheckboxSelectMultiple)
 
     def __init__(self, *args, **kwdargs):
         super(ChoiceCheckbox, self).__init__(*args, **kwdargs)

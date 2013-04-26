@@ -1,5 +1,11 @@
 {% extends "survey/base.html" %}
 {% load i18n %}
+{% block title %}{{ title }} - Results | Marinexplore{% endblock %}
+{% if survey.description %}
+    {% block metadescription %}
+        <meta name="description" content="{{ survey.description|striptags }}">
+    {% endblock %}
+{% endif %}
 {% block scripts %}{% load adminmedia %}
 <style type="text/css">
 .question pre { margin-left: 2em; }

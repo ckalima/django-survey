@@ -9,10 +9,10 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.admin.views.decorators import staff_member_required
-from django.http import HttpResponseRedirect, HttpResponse, Http404
-from django.http import HttpResponseNotFound
+from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound
 from django.template import loader, RequestContext
 from django.template.defaultfilters import slugify
+from django.template.loader import render_to_string
 from django.shortcuts import get_object_or_404, render_to_response
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.list_detail import object_list
@@ -47,9 +47,9 @@ def _survey_redirect(request, survey,
         request.REQUEST['next'].startswith('http:') and
         request.REQUEST['next'] != request.path):
         return HttpResponseRedirect(request.REQUEST['next'])
-    # if survey.answers_viewable_by(request.user):
-    #     return HttpResponseRedirect(reverse('survey-results', None, (),
-    #                                             {'survey_slug': survey.slug}))
+    if survey.answers_viewable_by(request.user):
+        return HttpResponseRedirect(reverse('survey-results', None, (),
+                                                {'survey_slug': survey.slug}))
 
     # For this survey, have they answered any questions?
     if (hasattr(request, 'session') and SurveyAnswer.objects.filter(
@@ -362,7 +362,6 @@ def choice_delete(request,survey_slug,choice_id,
          'extra_context': {'title': _('Delete choice')}
         })
 
-
 def visible_survey_list(request,
                         group_slug=None, group_slug_field=None, group_qs=None,
                         login_required = False,
@@ -379,7 +378,6 @@ def visible_survey_list(request,
               'template_name':template_name,
               'extra_context': {'title': _('Surveys')}}
         )
-
 
 @login_required()
 def editable_survey_list(request,
@@ -399,7 +397,6 @@ def editable_survey_list(request,
                             }
             })
 
-
 def answers_list(request, survey_slug,
                  group_slug=None, group_slug_field=None, group_qs=None,
                  template_name = 'survey/answers_list.html',
@@ -417,13 +414,12 @@ def answers_list(request, survey_slug,
                 reverse('answers-detail', None, (),
                         {'survey_slug': survey.slug,
                          'key': request.session.session_key.lower()}))
-        return HttpResponse(unicode(_('Insufficient Privileges.')), status=403)
+        return render_to_response('survey/no_privileges.html', {}, context_instance=RequestContext(request))
     return render_to_response(template_name,
         { 'survey': survey,
           'view_submissions': request.user.has_perm('survey.view_submissions'),
           'title': survey.title },
         context_instance=RequestContext(request))
-
 
 def answers_detail(request, survey_slug, key,
                    group_slug=None, group_slug_field=None, group_qs=None,

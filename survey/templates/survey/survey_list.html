@@ -28,7 +28,7 @@
             {% if survey.interview_count %}
                 <a href='{% url survey-results survey_slug=survey.slug %}'>{{ survey.interview_count }} Response{{ survey.interview_count|pluralize }}</a>
             {% else %}
-                {% trans "No Responses" %}
+                -
             {% endif %}
         {% else %}
             &nbsp;

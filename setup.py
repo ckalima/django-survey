@@ -2,11 +2,11 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-survey',
-    version='0.0.2',
-    description='A simple extensible survey application for django sites',
-    author='Yann Malet, Doug Napoleone',
-    author_email='yann.malet@gmail.com',
-    url='http://code.google.com/p/django-survey/',
+    version='0.0.3',
+    description='A simple extensible survey application for django sites. Forked from django-survey.',
+    author='Chris Kalima',
+    author_email='chris@marinexplore.com',
+    url='https://github.com/ckalima/django-survey',
     packages=find_packages(),
     classifiers=[
         'Development Status :: 3 - Alpha',

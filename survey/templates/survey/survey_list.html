@@ -5,8 +5,7 @@
 {% block survey_content %}
 <table class="table survey-listing">
     <thead>
-        <th>{% trans "Surveys" %}</th>
-        {% if user|can_view_answers:survey %}<th>{% trans "Responses"%}</th>{% endif %}
+        <th colspan="2">{% trans "Surveys" %}</th>
     </thead>
     <tbody>
     {% for survey in object_list %}
@@ -18,20 +17,23 @@
             {% else %}
                 {{ survey.title }}
             {% endif %}
-            <span class="survey-status survey-status-{{ survey.status }}">{{ survey.status }}</span>
-        </td>
-        {% if user|can_view_answers:survey %}
-        <td>
-            {% if survey.interview_count %}
-                <a href='{% url survey-results survey_slug=survey.slug %}'>{{ survey.interview_count }}</a>
-            {% else %}
-                {% trans "No Responses"%}
+            {% if request|has_answered:survey %}
+                <a class="survey-status survey-status-completed" href='{% url answers-detail survey_slug=survey.slug,key=request.session.session_key %}'>Completed</a>
+            {% elif survey.status != 'open' %}
+                <span class="survey-status survey-status-{{ survey.status }}">{{ survey.status }}</span>
             {% endif %}
-        {% endif %}
-        {% if request|has_answered:survey %}
-            &sdot; <a href='{% url answers-detail survey_slug=survey.slug,key=request.session.session_key %}'>Your Response</a>
         </td>
+        <td class="responses">
+        {% if user|can_view_answers:survey %}
+            {% if survey.interview_count %}
+                <a href='{% url survey-results survey_slug=survey.slug %}'>{{ survey.interview_count }} Response{{ survey.interview_count|pluralize }}</a>
+            {% else %}
+                {% trans "No Responses" %}
+            {% endif %}
+        {% else %}
+            &nbsp;
         {% endif %}
+        </td>
     </tr>
     {% endif %}
     {% endfor %}

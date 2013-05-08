@@ -17,7 +17,7 @@
         {% for question_form in survey.forms %}
             {{ question_form.as_template }}
         {% endfor %}
-        <button type="submit" class="btn btn-primary btn-block">Submit Survey</button>
+        <button type="submit" class="btn btn-primary btn-block" data-disable-on-click="1">Submit Survey</button>
     </fieldset>
 </form>
 {% endblock %}

@@ -306,6 +306,8 @@ QTYPE_FORM = {
 
 def forms_for_survey(survey, request, edit_existing=False):
     ## add session validation to base page.
+    if not request.session.exists(request.session.session_key):
+        request.session.create()
     sp = str(survey.id) + '_'
     session_key = request.session.session_key.lower()
     login_user = request.user

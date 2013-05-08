@@ -142,6 +142,12 @@ class SurveyChoiceRadio(SurveyChoiceAnswer):
         super(SurveyChoiceRadio, self).__init__(*args, **kwdargs)
         self.fields['answer'].widget = BootstrapRadioSelect(choices=self.choices)
 
+class SurveyChoiceInlineRadio(SurveyChoiceAnswer):
+    def __init__(self, *args, **kwargs):
+        super(SurveyChoiceInlineRadio, self).__init__(*args, **kwargs)
+        self.fields['answer'].widget = BootstrapInlineRadioSelect(choices=self.choices)
+
+# Bootstrap radio select
 class BootstrapRadioInput(RadioInput):
     """
     Twitter Bootstrap formatted radio input label.
@@ -172,6 +178,38 @@ class BootstrapRadioSelect(RadioSelect):
     Custom Twitter Bootstrap RadioSelect with proper layout rendering.
     """
     renderer = BootstrapRadioRenderer
+
+# Bootstrap inline radio select
+class BootstrapInlineRadioInput(RadioInput):
+    """
+    Twitter Bootstrap inline formatted radio input label.
+    """
+    def __unicode__(self):
+        if 'id' in self.attrs:
+            label_for = ' for="%s_%s"' % (self.attrs['id'], self.index)
+        else:
+            label_for = ''
+        return mark_safe(u'<label class="radio inline"%s>%s %s</label>' % (label_for, self.tag(), self.choice_label))
+
+class BootstrapInlineRadioRenderer(RadioFieldRenderer):
+    """
+    Overrides default <ul> wrappers for RadioSelect widget,
+    and renders with Twitter Bootstrap friendly markup.
+    """
+    def __iter__(self):
+        for i, choice in enumerate(self.choices):
+            yield BootstrapInlineRadioInput(self.name, self.value, self.attrs.copy(), choice, i)
+    def __getitem__(self, idx):
+        choice = self.choices[idx] # Let the IndexError propogate
+        return BootstrapInlineRadioInput(self.name, self.value, self.attrs.copy(), choice, idx)
+    def render(self):
+        return mark_safe(u'\n'.join([u'%s\n' % w for w in self]))
+
+class BootstrapInlineRadioSelect(RadioSelect):
+    """
+    Custom Twitter Bootstrap RadioSelect with proper layout rendering.
+    """
+    renderer = BootstrapInlineRadioRenderer
 
 class SurveyChoiceImage(SurveyChoiceAnswer):
     def __init__(self, *args, **kwdargs):
@@ -261,6 +299,7 @@ QTYPE_FORM = {
     'A': TextAreaAnswer,
     'S': SurveyChoiceAnswer,
     'R': SurveyChoiceRadio,
+    'RI': SurveyChoiceInlineRadio,
     'I': SurveyChoiceImage,
     'C': SurveyChoiceCheckbox,
 }

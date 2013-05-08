@@ -19,6 +19,7 @@ QTYPE_CHOICES = (
     ('A', 'Text Area'),
     ('S', 'Select One Choice'),
     ('R', 'Radio List'),
+    ('RI','Radio Inline List'),
     ('I', 'Radio Image List'),
     ('C', 'Checkbox List')
 )

@@ -2,17 +2,17 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-survey',
-    version='0.0.3',
+    version='1.0.0',
     description='A simple extensible survey application for django sites. Forked from django-survey.',
     author='Chris Kalima',
     author_email='chris@marinexplore.com',
     url='https://github.com/ckalima/django-survey',
     packages=find_packages(),
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
+        'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Framework :: Django',

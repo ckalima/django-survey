@@ -171,7 +171,7 @@ class SurveyQuestion(models.Model):
                                          null=True, blank=True,)
     # TODO: Modify the forms to respect the style defined by this attr (html,css)
 
-    qstyle = models.TextField(_("Html Style"),null=True, blank=True)
+    qstyle = models.TextField(_("HTML Class"),null=True, blank=True)
     ## model validation for requiring choices.
 
     @property

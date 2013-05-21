@@ -1,6 +1,6 @@
 {% load survey %}
 {% for bound_field in bound_fields %}
-    <div class="survey-question{% if forloop.first %} first{% endif %}">
+    <div class="survey-question{% if bound_field.form.question.qstyle %} {{ bound_field.form.question.qstyle }}{% endif %}{% if forloop.first %} first{% endif %}">
         {% if bound_field.errors %}
         <div class="control-group error">
             {{ bound_field.errors }}

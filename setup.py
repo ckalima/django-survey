@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-survey',
-    version='1.0.0',
+    version='1.0.2',
     description='A simple extensible survey application for django sites. Forked from django-survey.',
     author='Chris Kalima',
     author_email='chris@marinexplore.com',

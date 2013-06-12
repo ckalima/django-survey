@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound
@@ -15,8 +16,9 @@ from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
 from django.shortcuts import get_object_or_404, render_to_response
 from django.utils.translation import ugettext_lazy as _
-from django.views.generic.list_detail import object_list
-from django.views.generic.create_update import delete_object
+from django.views.generic.list import ListView
+from django.views.generic.edit import DeleteView
+# from django.views.generic.create_update import delete_object
 
 from survey.forms import forms_for_survey, SurveyForm, SurveyQuestionForm, SurveyChoiceForm
 from survey.models import Survey, SurveyAnswer, SurveyQuestion, SurveyChoice
@@ -362,40 +364,37 @@ def choice_delete(request,survey_slug,choice_id,
          'extra_context': {'title': _('Delete choice')}
         })
 
-def visible_survey_list(request,
-                        group_slug=None, group_slug_field=None, group_qs=None,
-                        login_required = False,
-                        template_name = "survey/survey_list.html",
-                        extra_context=None,
-                        *args, **kw):
-    login_user= request.user
-    if login_required and not login_user.is_authenticated():
-        return redirect_to_login(request.path)
-    else:
-        return object_list(request,
-            **{ 'queryset': Survey.objects.filter(visible=True),
-              'allow_empty': True,
-              'template_name':template_name,
-              'extra_context': {'title': _('Surveys')}}
-        )
 
-@login_required()
-def editable_survey_list(request,
-                         group_slug=None, group_slug_field=None, group_qs=None,
-                         template_name = "survey/editable_survey_list.html",
-                         extra_context=None,
-                         *args, **kw):
-    login_user= request.user
+class SurveyList(ListView):
+    """
+    """
+    model = Survey
+    template_name = 'survey/survey_list.html'
 
-    return object_list(request,
-        **{ 'queryset': Survey.objects.filter(Q(created_by=login_user) |
-                                            Q(editable_by=login_user)),
-          'allow_empty': True,
-          'template_name':template_name,
-          'extra_context': {'title': _('Surveys'),
-                            'group_slug': group_slug
-                            }
-            })
+    def get_context_data(self, **kwargs):
+        context = super(SurveyList, self).get_context_data(**kwargs)
+        context['title'] = _('Surveys')
+        return context
+
+
+class VisibleSurveyList(SurveyList):
+    def get_queryset(self, **kwargs):
+        qs = super(VisibleSurveyList, self).get_queryset(**kwargs)
+        return qs.filter(visible=True)
+
+
+class EditableSurveyList(SurveyList):
+    template_name = "survey/editable_survey_list.html"
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(SurveyList, self).dispatch(*args, **kwargs)
+
+    def get_queryset(self, **kwargs):
+        qs = super(EditableSurveyList, self).get_queryset(**kwargs)
+        u = self.request.user
+        return qs.filter(Q(created_by=u) | Q(editable_by=u))
+
 
 def answers_list(request, survey_slug,
                  group_slug=None, group_slug_field=None, group_qs=None,

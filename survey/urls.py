@@ -1,25 +1,26 @@
 from django.conf.urls.defaults import patterns, url
 from django.utils.translation import ugettext_lazy as _
-from django.views.generic.list_detail import object_list
-from django.views.generic.simple import direct_to_template
+from django.views.generic import TemplateView
 from django.conf.urls.defaults import *
 
 
-from models import Survey
+from .models import Survey
 
 
-from views import answers_list, answers_detail,\
+from .views import answers_list, answers_detail,\
                 survey_detail, survey_edit, survey_add,\
-                editable_survey_list, survey_delete, survey_update,\
+                survey_delete, survey_update,\
                 question_add, question_update,question_delete,\
-                choice_add, choice_update, choice_delete, delete_image,\
-                visible_survey_list
+                choice_add, choice_update, choice_delete, delete_image
+
+from .views import VisibleSurveyList, EditableSurveyList
 
 
 urlpatterns = patterns('',
 
-    url(r'^visible/$', visible_survey_list, name='surveys-visible'),
-    # url(r'^editable/$', editable_survey_list, name='surveys-editable'),
+    # url(r'^visible/$', visible_survey_list, name='surveys-visible'),
+    url(r'^visible/$', VisibleSurveyList.as_view(), name='surveys-visible'),
+    # url(r'^editable/$', EditableSurveyList.as_view(), name='surveys-editable'),
 
     url(r'^detail/(?P<survey_slug>[-\w]+)/$', survey_detail, name='survey-detail'),
 
@@ -40,7 +41,7 @@ urlpatterns = patterns('',
     # url(r'^choice/delete/(?P<survey_slug>[-\w]+)/(?P<choice_id>\d+)/$', choice_delete,   name='choice-delete'),
 
     # url(r'^delete_image/(?P<model_string>[-\w]+)/(?P<object_id>\d+)/$', delete_image, name='delete-image'),
-    url(r'^thank-you', direct_to_template, {'template': 'survey/thankyou.html'}),
-    url(r'^no-privileges', direct_to_template, {'template': 'survey/no_privileges.html'}),
-    url(r'^$', visible_survey_list, name='surveys'),
+    url(r'^thank-you', TemplateView.as_view(template_name='survey/thankyou.html')),
+    url(r'^no-privileges', TemplateView.as_view(template_name='survey/no_privileges.html')),
+    url(r'^$', VisibleSurveyList.as_view(), name='surveys'),
     )

@@ -3,15 +3,10 @@
 import datetime
 
 from django.db import models
-from django.conf import settings
 from django.core.cache import cache
-from django.utils import encoding
 from django.template.defaultfilters import date as datefilter
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
-
 
 User = get_user_model()
 
@@ -187,6 +182,7 @@ class SurveyQuestion(models.Model):
         return u' - '.join([self.survey.slug, self.text])
 
     class Meta:
+        verbose_name = "question"
         unique_together = (('survey', 'text'),)
         order_with_respect_to='survey'
         ordering = ('survey', 'order')
@@ -238,6 +234,7 @@ class SurveyChoice(models.Model):
         return self.text
 
     class Meta:
+        verbose_name = "choice"
         unique_together = (('question', 'text'),)
         order_with_respect_to='question'
         ordering = ('question', 'order')
@@ -260,6 +257,7 @@ class SurveyAnswer(models.Model):
 
     class Meta:
         # unique_together = (('question', 'session_key'),)
+        verbose_name = "answer"
         permissions = (("view_answers",     "Can view survey answers"),
                        ("view_submissions", "Can view survey submissions"))
         db_table = "survey_answer"

@@ -1,19 +1,19 @@
-from models import QTYPE_CHOICES, SurveyAnswer, Survey, SurveyQuestion, SurveyChoice
+from models import SurveyAnswer, Survey, SurveyQuestion, SurveyChoice
 from django.conf import settings
-from django.forms import BaseForm, Form, ValidationError
+from django.forms import Form, ValidationError
 from django.forms import CharField, ChoiceField, SplitDateTimeField,\
-                            CheckboxInput, BooleanField, FileInput,\
-                            FileField, ImageField
-from django.forms import Textarea, TextInput, Select, RadioSelect,\
+                            CheckboxInput
+from django.forms import Textarea, TextInput, Select,\
                             CheckboxSelectMultiple, MultipleChoiceField,\
-                            SplitDateTimeWidget,MultiWidget, MultiValueField
+                            SplitDateTimeWidget, MultiWidget
 from django.forms.forms import BoundField
 from django.forms.widgets import RadioInput, RadioFieldRenderer, RadioSelect
 from django.forms.models import ModelForm
 from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ungettext
 from django.utils.safestring import mark_safe
 from django.utils.encoding import force_unicode
-from django.utils.html import escape, conditional_escape
+from django.utils.html import conditional_escape
 from django.template import Context, loader
 from django.template.defaultfilters import slugify
 
@@ -268,15 +268,30 @@ class SurveyChoiceCheckbox(BaseAnswerForm):
         self.fields['answer'].initial = self.initial_answer
         if self.initial_answer is not None:
             self.initial['answer'] = self.initial_answer
-    def clean_answer(self):
 
+    def clean_answer(self):
         keys = self.cleaned_data['answer']
         if not keys and self.fields['answer'].required:
             raise ValidationError, _('This field is required.')
+        if self.question.choice_num_min:
+            choice_error = ungettext(
+                '%(count)d choice is',
+                '%(count)d choices are',
+                self.question.choice_num_min) % { 'count': self.question.choice_num_min, }
+            if len(keys) < self.question.choice_num_min:
+                raise ValidationError, _('At least %s required.' % choice_error)
+        if self.question.choice_num_max:
+            choice_error = ungettext(
+                '%(count)d choice is',
+                '%(count)d choices are',
+                self.question.choice_num_max) % { 'count': self.question.choice_num_max, }
+            if len(keys) > self.question.choice_num_max:
+                raise ValidationError, _('No more than %s allowed.' % choice_error)
         for key in keys:
             if not key and self.fields['answer'].required:
                 raise ValidationError, _('Invalid SurveyChoice.')
         return [self.choices_dict.get(key, key) for key in keys]
+
     def save(self, commit=True):
         if not self.cleaned_data['answer']:
             if self.fields['answer'].required:

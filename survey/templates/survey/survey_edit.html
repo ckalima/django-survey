@@ -8,7 +8,7 @@ input[type="radio"] { vertical-align: top; }
 {% endblock %}
 {% block survey_content %}
 <h1>{{ survey.title }}</h1>
-<ul class="object-tools"><li><a href='{% url survey-detail survey_slug=survey.slug %}' class="addlink">{% trans "View Online" %}</a></li></ul>
+<ul class="object-tools"><li><a href="{% url 'survey-detail' survey_slug=survey.slug %}" class="addlink">{% trans "View Online" %}</a></li></ul>
 <table style="width: 100%">
     <thead>
         <th>{% trans "Object type" %}</th><th>{% trans "order" %}</th><th>{% trans "type" %}</th>
@@ -25,9 +25,9 @@ input[type="radio"] { vertical-align: top; }
             <p> {{ survey.closes }}</p>
         </td>
         <td>
-            <a href='{% url survey-update survey_slug=survey.slug %}'>{% trans "Update"  %}</a>
-            <a href='{% url survey-delete survey_slug=survey.slug %}'>{% trans "Delete"  %}</a>
-            <a href='{% url question-add survey_slug=survey.slug %}'>{% trans "Add a question"  %}</a>
+            <a href="{% url 'survey-update' survey_slug=survey.slug %}">{% trans "Update"  %}</a>
+            <a href="{% url 'survey-delete' survey_slug=survey.slug %}">{% trans "Delete"  %}</a>
+            <a href="{% url 'question-add' survey_slug=survey.slug %}">{% trans "Add a question"  %}</a>
         </td>
     </tr>
     {% for question in survey.questions.all|order_by:"order" %}
@@ -40,9 +40,9 @@ input[type="radio"] { vertical-align: top; }
                 <p>{{ question.qstyle }}</p>
             </td>
             <td>
-                <a href='{% url question-update survey_slug=survey.slug, question_id=question.id %}'>{% trans "Update"  %}</a>
-                <a href='{% url question-delete survey_slug=survey.slug, question_id=question.id %}'>{% trans "Delete"  %}</a>
-                <a href='{% url choice-add question_id=question.id %}'>{% trans "Add a choice"  %}</a>
+                <a href="{% url 'question-update' survey_slug=survey.slug question_id=question.id %}">{% trans "Update"  %}</a>
+                <a href="{% url 'question-delete' survey_slug=survey.slug question_id=question.id %}">{% trans "Delete"  %}</a>
+                <a href="{% url 'choice-add' question_id=question.id %}">{% trans "Add a choice"  %}</a>
             </td>
         </tr>
         {% for choice in question.choices.all|order_by:"order" %}
@@ -54,8 +54,8 @@ input[type="radio"] { vertical-align: top; }
                     <p>{{ choice.text }}</p>
                 </td>
                 <td>
-                    <a href='{% url choice-update question_id=question.id,choice_id=choice.id %}'>{% trans "Update"  %}</a>
-                    <a href='{% url choice-delete survey_slug=survey.slug, choice_id=choice.id %}'>{% trans "Delete"  %}</a>
+                    <a href="{% url 'choice-update' question_id=question.id choice_id=choice.id %}">{% trans "Update"  %}</a>
+                    <a href="{% url 'choice-delete' survey_slug=survey.slug choice_id=choice.id %}">{% trans "Delete"  %}</a>
                 </td>
             </tr>
         {% endfor %}

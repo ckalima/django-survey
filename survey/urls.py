@@ -1,5 +1,4 @@
 from django.conf.urls.defaults import patterns, url
-from django.utils.translation import ugettext_lazy as _
 from django.views.generic import TemplateView
 from django.conf.urls.defaults import *
 
@@ -25,7 +24,7 @@ urlpatterns = patterns('',
     url(r'^detail/(?P<survey_slug>[-\w]+)/$', survey_detail, name='survey-detail'),
 
     url(r'^answers/(?P<survey_slug>[-\w]+)/$', answers_list, name='survey-results'),
-    url(r'^answers/(?P<survey_slug>[-\w]+)/(?P<key>[a-fA-F0-9]{10,40})/$', answers_detail, name='answers-detail'),
+    url(r'^answers/(?P<survey_slug>[-\w]+)/(?P<key>[a-zA-Z\d]{10,40})/$', answers_detail, name='answers-detail'),
 
     # url(r'^edit/(?P<survey_slug>[-\w]+)/$', survey_edit,   name='survey-edit'),
     # url(r'^add/$', survey_add,   name='survey-add'),

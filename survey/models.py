@@ -3,15 +3,10 @@
 import datetime
 
 from django.db import models
-from django.conf import settings
 from django.core.cache import cache
-from django.utils import encoding
 from django.template.defaultfilters import date as datefilter
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
-
 
 User = get_user_model()
 

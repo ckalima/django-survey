@@ -182,6 +182,7 @@ class SurveyQuestion(models.Model):
         return u' - '.join([self.survey.slug, self.text])
 
     class Meta:
+        verbose_name = "question"
         unique_together = (('survey', 'text'),)
         order_with_respect_to='survey'
         ordering = ('survey', 'order')
@@ -233,6 +234,7 @@ class SurveyChoice(models.Model):
         return self.text
 
     class Meta:
+        verbose_name = "choice"
         unique_together = (('question', 'text'),)
         order_with_respect_to='question'
         ordering = ('question', 'order')
@@ -255,6 +257,7 @@ class SurveyAnswer(models.Model):
 
     class Meta:
         # unique_together = (('question', 'session_key'),)
+        verbose_name = "answer"
         permissions = (("view_answers",     "Can view survey answers"),
                        ("view_submissions", "Can view survey submissions"))
         db_table = "survey_answer"

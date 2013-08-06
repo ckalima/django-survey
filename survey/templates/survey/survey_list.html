@@ -13,12 +13,12 @@
     <tr class="{% cycle row1,row2 %}">
         <td>
             {% if survey.open and not request|has_answered:survey %}
-                <a href='{% url 'survey-detail' survey_slug=survey.slug %}'>{{ survey.title }}</a>
+                <a href="{% url 'survey-detail' survey_slug=survey.slug %}">{{ survey.title }}</a>
             {% else %}
                 {{ survey.title }}
             {% endif %}
             {% if request|has_answered:survey %}
-                <a class="survey-status survey-status-completed" href='{% url 'answers-detail' survey_slug=survey.slug key=request.session.session_key %}'>Completed</a>
+                <a class="survey-status survey-status-completed" href="{% url 'answers-detail' survey_slug=survey.slug key=request.session.session_key %}">Completed</a>
             {% elif survey.status != 'open' %}
                 <span class="survey-status survey-status-{{ survey.status }}">{{ survey.status }}</span>
             {% endif %}
@@ -26,7 +26,7 @@
         <td class="responses">
         {% if user|can_view_answers:survey %}
             {% if survey.interview_count %}
-                <a href='{% url 'survey-results' survey_slug=survey.slug %}'>{{ survey.interview_count }} Response{{ survey.interview_count|pluralize }}</a>
+                <a href="{% url 'survey-results' survey_slug=survey.slug %}">{{ survey.interview_count }} Response{{ survey.interview_count|pluralize }}</a>
             {% else %}
                 -
             {% endif %}

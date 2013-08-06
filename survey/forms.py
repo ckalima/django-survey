@@ -1,12 +1,11 @@
-from models import QTYPE_CHOICES, SurveyAnswer, Survey, SurveyQuestion, SurveyChoice
+from models import SurveyAnswer, Survey, SurveyQuestion, SurveyChoice
 from django.conf import settings
-from django.forms import BaseForm, Form, ValidationError
+from django.forms import Form, ValidationError
 from django.forms import CharField, ChoiceField, SplitDateTimeField,\
-                            CheckboxInput, BooleanField, FileInput,\
-                            FileField, ImageField
-from django.forms import Textarea, TextInput, Select, RadioSelect,\
+                            CheckboxInput
+from django.forms import Textarea, TextInput, Select,\
                             CheckboxSelectMultiple, MultipleChoiceField,\
-                            SplitDateTimeWidget,MultiWidget, MultiValueField
+                            SplitDateTimeWidget, MultiWidget
 from django.forms.forms import BoundField
 from django.forms.widgets import RadioInput, RadioFieldRenderer, RadioSelect
 from django.forms.models import ModelForm
@@ -14,7 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ungettext
 from django.utils.safestring import mark_safe
 from django.utils.encoding import force_unicode
-from django.utils.html import escape, conditional_escape
+from django.utils.html import conditional_escape
 from django.template import Context, loader
 from django.template.defaultfilters import slugify
 
